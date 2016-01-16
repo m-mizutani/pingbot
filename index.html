@@ -3,15 +3,21 @@
   <head>
     <meta charset="UTF-8">
     <title>PingBot</title>
+    <script type="text/javascript" src="static/js/d3.v3.min.js"></script>
     <script type="text/javascript" src="static/js/main.js"></script>
     <link rel="stylesheet" href="static/css/main.css" type="text/css" media="screen" />
   </head>
   <body>
-    <h1>PingBot</h1>
-    <div class="cf" id="input">
-      <input type="text" id="target" value=""></input>
-      <button id="send">Send</button>
+    <div class="header cf">
+      <div class="title cont">
+	<h1>PingBot</h1>
+      </div>
+      <div class="inputbox cont">
+	<input type="text" id="target" value=""></input>
+	<button id="send">Ping</button>
+      </div>
     </div>
+
     <div id="sessions">
     </div>
   </body>

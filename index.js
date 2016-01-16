@@ -19,7 +19,7 @@ app.on('window-all-closed', function() {
 });
 
 app.on('ready', function() {
-  mainWindow = new BrowserWindow({width: 800, height: 600});
+  mainWindow = new BrowserWindow({width: 840, height: 600});
   mainWindow.loadURL('file://' + __dirname + '/index.html');
 
   // デバッグ用、開発ツールを自動で開く
@@ -28,16 +28,32 @@ app.on('ready', function() {
   // renderer processからテキストの受け取り
   const interval_map = {};
 
-  function start_session(target, sid) {
+  function start_session(addr, target, sid) {
     const session = ping.createSession();
     const int_id = setInterval(function() {
-      session.pingHost(target, function(err, target, sent_ts, recv_ts) {
+      session.pingHost(addr, function(err, addr, sent_ts, recv_ts) {
         if (err) {
-          const ng_msg = {target: target, sid: sid, stat: 'error', msg: err.toString()};
-          mainWindow.send('res', JSON.stringify(ng_msg));
+          const ng_msg = {
+            addr: addr,
+                target: target,
+                sid: sid,
+                stat: 'error',
+                msg: err.toString()
+          };
+          if (mainWindow !== null) {
+            mainWindow.send('res', JSON.stringify(ng_msg));
+          }
         } else {
-          const ok_msg = {target: target, sid: sid, stat: 'avail', rtt: recv_ts - sent_ts};
-          mainWindow.send('res', JSON.stringify(ok_msg));
+          const ok_msg = {
+            addr: addr,
+                target: target,
+                sid: sid,
+                stat: 'avail',
+                rtt: recv_ts - sent_ts
+          };
+          if (mainWindow !== null) {
+            mainWindow.send('res', JSON.stringify(ok_msg));
+          }
         }
       });
     }, 1000);
@@ -47,7 +63,7 @@ app.on('ready', function() {
   ipc.on('start', function(event, raw) {
     const jdata = JSON.parse(raw);
     console.log(jdata);
-    const target = jdata.target;
+    const target = jdata.target;    
     const sid = jdata.sid;
 
     if (interval_map[sid] !== undefined) {
@@ -55,15 +71,20 @@ app.on('ready', function() {
     }
     
     if (target.match(/(\d{1,3}\.){3}\d{1,3}/)) {
-      start_session(target, sid);
+      start_session(target, target, sid);
     } else {
       dns.resolve4(target, function(err, res) {
         if (err) {
-          const ng_msg = {target: target, stat: 'error', sid: sid, msg: err.toString()};
+          const ng_msg = {
+            target: target,
+            stat: 'error',
+            sid: sid,
+            msg: err.toString()
+          };
           mainWindow.send('res', JSON.stringify(ng_msg));
         } else {
           console.log(res);
-          start_session(res[0], sid);
+          start_session(res[0], target, sid);
         }
       });
     }
