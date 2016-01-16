@@ -18,6 +18,30 @@ app.on('window-all-closed', function() {
     app.quit();
 });
 
+function install_menu() {
+  var menu = require('menu');
+  var mt = menu.buildFromTemplate([
+    {
+      label: 'Electron',
+      submenu: [
+        {
+          label: 'About',
+          click: function() {
+            var about_window = new BrowserWindow({width: 400, height: 600});
+            about_window.loadURL('file://' + __dirname + '/about.html');
+          }
+        },
+        {
+          label: 'Quit',
+          accelerator: 'Command+Q',
+          click: function() { app.quit(); }
+        },
+      ]
+    }
+  ]);
+  menu.setApplicationMenu(mt);
+}
+
 app.on('ready', function() {
   mainWindow = new BrowserWindow({width: 840, height: 600});
   mainWindow.loadURL('file://' + __dirname + '/index.html');
@@ -25,6 +49,8 @@ app.on('ready', function() {
   // デバッグ用、開発ツールを自動で開く
   // mainWindow.openDevTools(true);
 
+  install_menu();
+  
   // renderer processからテキストの受け取り
   const interval_map = {};
 
